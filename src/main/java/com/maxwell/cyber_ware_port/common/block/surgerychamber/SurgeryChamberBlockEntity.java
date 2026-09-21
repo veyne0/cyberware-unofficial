@@ -9,15 +9,22 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Containers;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class SurgeryChamberBlockEntity extends BlockEntity {
+    /** 拆解产物输出栏(最多同时装下蜘蛛的 9 个部位) */
+    public static final int OUTPUT_SLOTS = 9;
     public float animationProgress = 0;
     public float prevAnimationProgress = 0;
+    private final ItemStackHandler outputHandler = new ItemStackHandler(OUTPUT_SLOTS);
 
     public SurgeryChamberBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(ModBlockEntities.SURGERY_CHAMBER.get(), pPos, pBlockState);
@@ -48,7 +55,15 @@ public class SurgeryChamberBlockEntity extends BlockEntity {
         return this.level != null && this.getBlockState().getValue(SurgeryChamberBlock.OPEN);
     }
 
+    public ItemStackHandler getOutputHandler() {
+        return this.outputHandler;
+    }
+
     public void setDoorState(boolean open) {
+        setDoorState(open, null);
+    }
+
+    public void setDoorState(boolean open, @Nullable Player player) {
         if (this.level == null || this.level.isClientSide) return;
         BlockState currentState = this.getBlockState();
         if (currentState.getValue(SurgeryChamberBlock.OPEN) != open) {
@@ -60,18 +75,58 @@ public class SurgeryChamberBlockEntity extends BlockEntity {
             if (aboveState.is(currentState.getBlock())) {
                 this.level.setBlock(abovePos, aboveState.setValue(SurgeryChamberBlock.OPEN, open), 3);
             }
+            // 开门时把拆解产物直接交给开门的玩家,拿不下的掉在舱边
+            if (open) {
+                distributeOutput(player);
+            }
             setChanged();
         }
     }
 
-    public void toggleDoor() {
-        setDoorState(!isOpen());
+    public void toggleDoor(@Nullable Player player) {
+        setDoorState(!isOpen(), player);
+    }
+
+    /** 分发输出栏内容:优先塞进玩家背包,剩余掉落在舱门附近 */
+    private void distributeOutput(@Nullable Player player) {
+        boolean any = false;
+        for (int i = 0; i < this.outputHandler.getSlots(); i++) {
+            ItemStack stack = this.outputHandler.getStackInSlot(i);
+            if (stack.isEmpty()) continue;
+            any = true;
+            if (player != null && player.getInventory().add(stack.copy())) {
+                this.outputHandler.setStackInSlot(i, ItemStack.EMPTY);
+            }
+        }
+        if (!any) return;
+        for (int i = 0; i < this.outputHandler.getSlots(); i++) {
+            ItemStack stack = this.outputHandler.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                Containers.dropItemStack(this.level, this.worldPosition.getX() + 0.5,
+                        this.worldPosition.getY() + 0.5, this.worldPosition.getZ() + 0.5, stack);
+                this.outputHandler.setStackInSlot(i, ItemStack.EMPTY);
+            }
+        }
+    }
+
+    /** 手术舱被破坏时掉落输出栏内容 */
+    public void drops() {
+        if (this.level == null) return;
+        for (int i = 0; i < this.outputHandler.getSlots(); i++) {
+            ItemStack stack = this.outputHandler.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                Containers.dropItemStack(this.level, this.worldPosition.getX() + 0.5,
+                        this.worldPosition.getY() + 0.5, this.worldPosition.getZ() + 0.5, stack);
+                this.outputHandler.setStackInSlot(i, ItemStack.EMPTY);
+            }
+        }
     }
 
     @Override
     protected void saveAdditional(CompoundTag pTag, HolderLookup.Provider pRegistries) {
         super.saveAdditional(pTag, pRegistries);
         pTag.putFloat("AnimationProgress", this.animationProgress);
+        pTag.put("Output", this.outputHandler.serializeNBT(pRegistries));
     }
 
     @Override
@@ -80,6 +135,9 @@ public class SurgeryChamberBlockEntity extends BlockEntity {
         if (pTag.contains("AnimationProgress")) {
             this.animationProgress = pTag.getFloat("AnimationProgress");
             this.prevAnimationProgress = this.animationProgress;
+        }
+        if (pTag.contains("Output")) {
+            this.outputHandler.deserializeNBT(pRegistries, pTag.getCompound("Output"));
         }
     }
 

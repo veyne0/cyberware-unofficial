@@ -51,8 +51,10 @@ public class RobosurgeonMenu extends AbstractContainerMenu {
                     for (int j = 0; j < RobosurgeonBlockEntity.TOTAL_SLOTS; j++) {
                         if (j == this.getSlotIndex()) continue;
                         ItemStack other = handler.getStackInSlot(j);
-                        if (!other.isEmpty() && other.is(stack.getItem())) {
-                            if (other.getOrDefault(CyberWare.GHOST_COMPONENT.get(), false)) continue;
+                        // 注意:所有生物部位共用同一个物品 id(mob_part),具体部位由数据组件区分,
+                        // 必须用"同物品且同组件"比较,否则不同部位会互相顶掉
+                        if (!other.isEmpty() && !other.getOrDefault(CyberWare.GHOST_COMPONENT.get(), false)
+                                && ItemStack.isSameItemSameComponents(other, stack)) {
                             currentCount += other.getCount();
                         }
                     }

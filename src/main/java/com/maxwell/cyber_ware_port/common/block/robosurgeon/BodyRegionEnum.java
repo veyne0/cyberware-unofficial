@@ -12,7 +12,9 @@ public enum BodyRegionEnum {
     ARMS,
     HANDS,
     LEGS,
-    BOOTS;
+    BOOTS,
+    HEAD,
+    TORSO;
     public static final int SLOTS_PER_PART = 9;
 
     public static int getTotalSlots() {

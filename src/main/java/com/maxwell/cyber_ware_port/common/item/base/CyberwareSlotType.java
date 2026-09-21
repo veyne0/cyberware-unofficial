@@ -19,6 +19,8 @@ public enum CyberwareSlotType {
     HANDS("cyberware_slot.cyber_ware_port.hands"),
     LEGS("cyberware_slot.cyber_ware_port.legs"),
     BOOTS("cyberware_slot.cyber_ware_port.boots"),
+    HEAD("cyberware_slot.cyber_ware_port.head"),
+    TORSO("cyberware_slot.cyber_ware_port.torso"),
     UNKNOWN("cyberware_slot.cyber_ware_port.unknown");
     private final String translationKey;
 
@@ -40,6 +42,8 @@ public enum CyberwareSlotType {
         if (isInRange(id, SLOT_HANDS)) return HANDS;
         if (isInRange(id, SLOT_LEGS)) return LEGS;
         if (isInRange(id, SLOT_BOOTS)) return BOOTS;
+        if (isInRange(id, SLOT_HEAD)) return HEAD;
+        if (isInRange(id, SLOT_TORSO)) return TORSO;
         return UNKNOWN;
 
     }

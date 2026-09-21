@@ -101,10 +101,20 @@ public class SurgeryChamberBlock extends HorizontalDirectionalBlock implements E
         BlockPos targetPos = pState.getValue(HALF) == DoubleBlockHalf.UPPER ? pPos.below() : pPos;
         BlockEntity blockEntity = pLevel.getBlockEntity(targetPos);
         if (blockEntity instanceof SurgeryChamberBlockEntity chamberEntity) {
-            chamberEntity.toggleDoor();
+            chamberEntity.toggleDoor(pPlayer);
             return InteractionResult.CONSUME;
         }
         return InteractionResult.PASS;
+    }
+
+    @Override
+    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pMovedByPiston) {
+        if (!pState.is(pNewState.getBlock()) && pState.getValue(HALF) == DoubleBlockHalf.LOWER) {
+            if (pLevel.getBlockEntity(pPos) instanceof SurgeryChamberBlockEntity chamberEntity) {
+                chamberEntity.drops();
+            }
+        }
+        super.onRemove(pState, pLevel, pPos, pNewState, pMovedByPiston);
     }
 
     @Override

@@ -5,9 +5,11 @@ import com.maxwell.cyber_ware_port.api.json.CyberwareAPI;
 import com.maxwell.cyber_ware_port.client.upgrades.cybereye.CyberwareMenuScreen;
 import com.maxwell.cyber_ware_port.common.capability.CyberwareCapabilityProvider;
 import com.maxwell.cyber_ware_port.common.capability.CyberwareUserData;
+import com.maxwell.cyber_ware_port.common.block.robosurgeon.RobosurgeonBlockEntity;
 import com.maxwell.cyber_ware_port.common.item.base.BodyPartType;
 import com.maxwell.cyber_ware_port.common.item.base.CyberwareSlotType;
 import com.maxwell.cyber_ware_port.common.item.base.ICyberware;
+import com.maxwell.cyber_ware_port.common.item.cyberware.MobPartItem;
 import com.maxwell.cyber_ware_port.common.network.ClientPacketHandler;
 import com.maxwell.cyber_ware_port.common.network.DoubleJumpPacket;
 import com.maxwell.cyber_ware_port.init.ModBlocks;
@@ -182,24 +184,107 @@ public class ForgeClientEvents {
         model.rightArm.visible = model.rightSleeve.visible = true;
         model.leftLeg.visible = model.leftPants.visible = true;
         model.rightLeg.visible = model.rightPants.visible = true;
+        model.head.visible = model.hat.visible = true;
+        model.body.visible = model.jacket.visible = true;
         CyberwareUserData data = player.getData(CyberwareCapabilityProvider.CYBERWARE_DATA.get());
-        if (hasSkinUpgrade(data)) return;
-        if (!data.isCyberwareInstalled(ModItems.HUMAN_LEFT_ARM.get())) {
+        ItemStackHandler handler = data.getInstalledCyberware();
+        // 生物部位隐藏(最高优先级,必须在 hasSkinUpgrade 提前 return 之前,
+        // 否则装了合成皮肤时生物部位会一直叠加在原版身体上)
+        if (hasMobPart(handler, BodyPartType.HEAD)) {
+            model.head.visible = false;
+            model.hat.visible = false;
+        }
+        if (hasMobPart(handler, BodyPartType.TORSO)) {
+            model.body.visible = false;
+            model.jacket.visible = false;
+        }
+        if (hasMobPart(handler, BodyPartType.ARM_LEFT)) {
             model.leftArm.visible = false;
             model.leftSleeve.visible = false;
         }
-        if (!data.isCyberwareInstalled(ModItems.HUMAN_RIGHT_ARM.get())) {
+        if (hasMobPart(handler, BodyPartType.ARM_RIGHT)) {
             model.rightArm.visible = false;
             model.rightSleeve.visible = false;
         }
-        if (!data.isCyberwareInstalled(ModItems.HUMAN_LEFT_LEG.get())) {
+        if (hasMobPart(handler, BodyPartType.LEG_LEFT)) {
             model.leftLeg.visible = false;
             model.leftPants.visible = false;
         }
-        if (!data.isCyberwareInstalled(ModItems.HUMAN_RIGHT_LEG.get())) {
+        if (hasMobPart(handler, BodyPartType.LEG_RIGHT)) {
             model.rightLeg.visible = false;
             model.rightPants.visible = false;
         }
+        if (player.tickCount % 200 == 0) {
+            CyberWare.LOGGER.info("[CW-DBG] Pre: skin={} mobHead={} mobTorso={} => headVis={} bodyVis={}",
+                    hasSkinUpgrade(data), hasMobPart(handler, BodyPartType.HEAD), hasMobPart(handler, BodyPartType.TORSO),
+                    model.head.visible, model.body.visible);
+        }
+        if (hasSkinUpgrade(data)) return;
+        // 四肢:装了任意义体(非空)就隐藏原版肢体,生物肢体由 MobPartPlayerLayer 接管
+        if (hasAnyPart(handler, BodyPartType.ARM_LEFT)) {
+            model.leftArm.visible = false;
+            model.leftSleeve.visible = false;
+        }
+        if (hasAnyPart(handler, BodyPartType.ARM_RIGHT)) {
+            model.rightArm.visible = false;
+            model.rightSleeve.visible = false;
+        }
+        if (hasAnyPart(handler, BodyPartType.LEG_LEFT)) {
+            model.leftLeg.visible = false;
+            model.leftPants.visible = false;
+        }
+        if (hasAnyPart(handler, BodyPartType.LEG_RIGHT)) {
+            model.rightLeg.visible = false;
+            model.rightPants.visible = false;
+        }
+        // 头/躯干:装着人类对应部位且没有生物部位覆盖才显示原版外观
+        if (!hasHumanPart(handler, RobosurgeonBlockEntity.SLOT_HEAD)
+                || hasMobPart(handler, BodyPartType.HEAD)) {
+            model.head.visible = false;
+            model.hat.visible = false;
+        }
+        if (!hasHumanPart(handler, RobosurgeonBlockEntity.SLOT_TORSO)
+                || hasMobPart(handler, BodyPartType.TORSO)) {
+            model.body.visible = false;
+            model.jacket.visible = false;
+        }
+    }
+
+    /** 指定槽位首格是否装着人类对应部位 */
+    private static boolean hasHumanPart(ItemStackHandler handler, int slotStart) {
+        ItemStack stack = handler.getStackInSlot(slotStart);
+        Item item = stack.getItem();
+        return item == ModItems.HUMAN_HEAD.get() || item == ModItems.HUMAN_TORSO.get()
+                || item == ModItems.HUMAN_LEFT_ARM.get() || item == ModItems.HUMAN_RIGHT_ARM.get()
+                || item == ModItems.HUMAN_LEFT_LEG.get() || item == ModItems.HUMAN_RIGHT_LEG.get();
+    }
+
+    /** 玩家身上是否装了指定身体类型的义体 */
+    private static boolean hasAnyPart(ItemStackHandler handler, BodyPartType part) {
+        for (int i = 0; i < handler.getSlots(); i++) {
+            ItemStack stack = handler.getStackInSlot(i);
+            if (stack.isEmpty()) continue;
+            if (stack.getItem() instanceof MobPartItem && MobPartItem.getPart(stack) == part) return true;
+            if (part == BodyPartType.ARM_LEFT || part == BodyPartType.ARM_RIGHT
+                    || part == BodyPartType.LEG_LEFT || part == BodyPartType.LEG_RIGHT) {
+                // 旧的人类义体也走 hide 原版 + 由 CyberwarePlayerLayer 接管(原逻辑)
+                Item item = stack.getItem();
+                if (item == ModItems.HUMAN_LEFT_ARM.get() || item == ModItems.HUMAN_RIGHT_ARM.get()
+                        || item == ModItems.HUMAN_LEFT_LEG.get() || item == ModItems.HUMAN_RIGHT_LEG.get()) return true;
+            }
+        }
+        return false;
+    }
+
+    /** 玩家身上是否安装了指定类型的生物部位(可能在区域内的任意槽位) */
+    private static boolean hasMobPart(ItemStackHandler handler, BodyPartType part) {
+        for (int i = 0; i < handler.getSlots(); i++) {
+            ItemStack stack = handler.getStackInSlot(i);
+            if (stack.getItem() instanceof MobPartItem && MobPartItem.getPart(stack) == part) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean hasSkinUpgrade(CyberwareUserData data) {

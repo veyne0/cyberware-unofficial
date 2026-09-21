@@ -85,6 +85,8 @@ public class RobosurgeonScreen extends AbstractContainerScreen<RobosurgeonMenu> 
     private float currentOffsetX = 0f;
     private float currentOffsetY = 0f;
     private boolean hideName = false;
+    /** false=内部器官模式(默认),true=外部表面部位模式(头/躯干/四肢) */
+    private boolean externalMode = false;
 
     public RobosurgeonScreen(RobosurgeonMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
@@ -197,6 +199,36 @@ public class RobosurgeonScreen extends AbstractContainerScreen<RobosurgeonMenu> 
             }
         };
         this.addRenderableWidget(this.installedListButton);
+        // 内部/外部部位模式切换按钮
+        int modeBtnX = this.leftPos + 146;
+        int modeBtnY = this.topPos + 4;
+        AbstractWidget modeButton = new AbstractWidget(modeBtnX, modeBtnY, 10, 10, Component.empty()) {
+            @Override
+            public void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+                guiGraphics.blit(TEXTURE, this.getX(), this.getY(), 176, 122, 10, 10, 256, 256);
+                String label = RobosurgeonScreen.this.externalMode ? "外" : "内";
+                guiGraphics.drawString(font, label, this.getX() + (this.width - font.width(label)) / 2, this.getY() + 1, RobosurgeonScreen.this.externalMode ? 0x55FF55 : 0x55FFFF, true);
+                if (this.isHovered()) {
+                    guiGraphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0x50FFFFFF);
+                    guiGraphics.renderTooltip(font, Component.translatable("gui.cyber_ware_port.button.toggle_parts"), mouseX, mouseY);
+                }
+            }
+
+            @Override
+            public void onClick(double mouseX, double mouseY) {
+                RobosurgeonScreen.this.externalMode = !RobosurgeonScreen.this.externalMode;
+                RobosurgeonScreen.this.selectedPart = BodyPart.NONE;
+                RobosurgeonScreen.this.selectedMarker = null;
+                RobosurgeonScreen.this.hideName = false;
+                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F));
+            }
+
+            @Override
+            protected void updateWidgetNarration(@NotNull NarrationElementOutput narrationElementOutput) {
+                this.defaultButtonNarrationText(narrationElementOutput);
+            }
+        };
+        this.addRenderableWidget(modeButton);
     }
 
     @Override
@@ -247,7 +279,7 @@ public class RobosurgeonScreen extends AbstractContainerScreen<RobosurgeonMenu> 
                 float sin = (float) Math.sin(radRot);
                 float cos = (float) Math.cos(radRot);
                 float scaleFactor = currentScale * 0.065f;
-                for (TargetMarker marker : this.selectedPart.markers) {
+                for (TargetMarker marker : this.selectedPart.markers(this.externalMode)) {
                     float screenOffsetX = (marker.modelX() * cos) - (marker.modelZ() * sin);
                     int markerX = modelCenterX + (int) (screenOffsetX * scaleFactor) - 8;
                     int markerY = modelCenterY - (int) (marker.modelY() * scaleFactor) - 8;
@@ -258,7 +290,7 @@ public class RobosurgeonScreen extends AbstractContainerScreen<RobosurgeonMenu> 
                     }
                 }
             }
-            if (this.selectedPart == BodyPart.NONE) {
+            if (this.selectedPart == BodyPart.NONE && !this.externalMode) {
                 int x = (this.width - this.imageWidth) / 2;
                 int y = (this.height - this.imageHeight) / 2;
                 int subBaseX = x + 40;
@@ -274,6 +306,8 @@ public class RobosurgeonScreen extends AbstractContainerScreen<RobosurgeonMenu> 
                 if (pMouseX >= this.leftPos && pMouseX < this.leftPos + this.imageWidth && pMouseY >= this.topPos && pMouseY < this.topPos + TOP_HEIGHT) {
                     this.potentialDrag = true;
                     this.dragStartX = pMouseX;
+                    // 必须把事件传给 super,否则切换按钮/索引按钮这些控件收不到点击
+                    super.mouseClicked(pMouseX, pMouseY, pButton);
                     return true;
                 }
             }
@@ -309,6 +343,8 @@ public class RobosurgeonScreen extends AbstractContainerScreen<RobosurgeonMenu> 
                 int entityY = this.topPos + TOP_HEIGHT - 15;
                 for (BodyPart part : BodyPart.values()) {
                     if (part == BodyPart.NONE) continue;
+                    // 当前模式下没有标记的区域不可选(内部模式下手臂/腿,外部模式下 INTERNAL)
+                    if (part.markers(this.externalMode).isEmpty()) continue;
                     if (pMouseX >= entityX + part.hitX - (part.hitW / 2.0) && pMouseX <= entityX + part.hitX + (part.hitW / 2.0) &&
                             pMouseY >= entityY + part.hitY - (part.hitH / 2.0) && pMouseY <= entityY + part.hitY + (part.hitH / 2.0)) {
                         this.selectedPart = part;
@@ -363,7 +399,7 @@ public class RobosurgeonScreen extends AbstractContainerScreen<RobosurgeonMenu> 
             float scaleFactor = currentScale * 0.065f;
             RenderSystem.enableBlend();
             pGuiGraphics.setColor(1.0F, 1.0F, 1.0F, 0.8F);
-            for (TargetMarker marker : this.selectedPart.markers) {
+            for (TargetMarker marker : this.selectedPart.markers(this.externalMode)) {
                 float screenOffsetX = (marker.modelX() * cos) - (marker.modelZ() * sin);
                 int markerX = modelCenterX + (int) (screenOffsetX * scaleFactor) - 8;
                 int markerY = modelCenterY - (int) (marker.modelY() * scaleFactor) - 8;
@@ -492,7 +528,7 @@ public class RobosurgeonScreen extends AbstractContainerScreen<RobosurgeonMenu> 
             currentRotation = this.viewRotation;
         }
 
-        if (this.internalPartsModel != null && this.selectedPart != BodyPart.ARM_LEFT && this.selectedPart != BodyPart.ARM_RIGHT && this.selectedPart != BodyPart.LEG_LEFT && this.selectedPart != BodyPart.LEG_RIGHT && this.selectedPart != BodyPart.HEAD && this.selectedPart != BodyPart.TORSO) {
+        if (!this.externalMode && this.internalPartsModel != null && this.selectedPart != BodyPart.ARM_LEFT && this.selectedPart != BodyPart.ARM_RIGHT && this.selectedPart != BodyPart.LEG_LEFT && this.selectedPart != BodyPart.LEG_RIGHT && this.selectedPart != BodyPart.HEAD && this.selectedPart != BodyPart.TORSO) {
             int subX = (this.selectedPart == BodyPart.INTERNAL) ? drawX - 48 : x + 40;
             int subY = (this.selectedPart == BodyPart.INTERNAL) ? drawY : y + TOP_HEIGHT - 21;
             int subScale = (this.selectedPart == BodyPart.INTERNAL) ? (int) currentScale : 40;
@@ -621,19 +657,35 @@ public class RobosurgeonScreen extends AbstractContainerScreen<RobosurgeonMenu> 
     }
 
     private enum BodyPart {
-        HEAD(0, -80, 32, 32, 0, 160, 120f, List.of(new TargetMarker(Component.literal("Left Eye"), 2, 25.5f, -3.4f, slots(RobosurgeonBlockEntity.SLOT_EYES)), new TargetMarker(Component.literal("Right Eye"), -2f, 25.5f, -3.4f, slots(RobosurgeonBlockEntity.SLOT_EYES)), new TargetMarker(Component.literal("Brain"), -0.13f, 27.56f, 1.52f, slots(RobosurgeonBlockEntity.SLOT_BRAIN)))),
-        TORSO(0, -54, 26, 32, 0, 120, 120f, List.of(new TargetMarker(Component.literal("Heart"), 0f, 21f, -0.5f, slots(RobosurgeonBlockEntity.SLOT_HEART)), new TargetMarker(Component.literal("Left Lung"), 2.3f, 20f, 0, slots(RobosurgeonBlockEntity.SLOT_LUNGS)), new TargetMarker(Component.literal("Stomach"), 0.0f, 16f, -1.5f, slots(RobosurgeonBlockEntity.SLOT_STOMACH)), new TargetMarker(Component.literal("Right Lung"), -2.3f, 20f, 0f, slots(RobosurgeonBlockEntity.SLOT_LUNGS)))),
-        ARM_LEFT(18, -54, 12, 34, -60, 120, 120f, List.of(new TargetMarker(Component.literal("Left Arm"), 4.7f, 21.0f, -0, slots(RobosurgeonBlockEntity.SLOT_ARMS)), new TargetMarker(Component.literal("Left Hand"), 5.8f, 14f, 0f, slots(RobosurgeonBlockEntity.SLOT_HANDS)))),
-        ARM_RIGHT(-18, -54, 12, 34, 60, 120, 120f, List.of(new TargetMarker(Component.literal("Right Arm"), -4.7f, 21.0f, 0f, slots(RobosurgeonBlockEntity.SLOT_ARMS)), new TargetMarker(Component.literal("Right Hand"), -5.8f, 14f, 0f, slots(RobosurgeonBlockEntity.SLOT_HANDS)))),
-        LEG_LEFT(5, -19, 12, 38, -50, 20, 120f, List.of(new TargetMarker(Component.literal("Left Leg"), 2f, 10.0f, 0f, slots(RobosurgeonBlockEntity.SLOT_LEGS)), new TargetMarker(Component.literal("Left Foot"), 2.1f, 3.9f, 0f, slots(RobosurgeonBlockEntity.SLOT_BOOTS)))),
-        LEG_RIGHT(-5, -19, 12, 38, 50, 20, 120f, List.of(new TargetMarker(Component.literal("Right Leg"), -2f, 10.0f, 0f, slots(RobosurgeonBlockEntity.SLOT_LEGS)), new TargetMarker(Component.literal("Right Foot"), -2.1f, 3.9f, 0f, slots(RobosurgeonBlockEntity.SLOT_BOOTS)))),
-        INTERNAL(0, 0, 40, 50, 48, 130, 150f, List.of(new TargetMarker(Component.literal("Skin"), -3.0f, 24.6f, -5.5f, slots(RobosurgeonBlockEntity.SLOT_SKIN)), new TargetMarker(Component.literal("Muscle"), -0, 22.7f, -5.5f, slots(RobosurgeonBlockEntity.SLOT_MUSCLE)), new TargetMarker(Component.literal("Bone"), 3.0f, 20.8f, -5.5f, slots(RobosurgeonBlockEntity.SLOT_BONES)))),
-        NONE(0, 0, 0, 0, 0, 0, 45f, List.of());
+        // 内部模式只给器官标记,外部模式只给表面部位标记
+        HEAD(0, -80, 32, 32, 0, 160, 120f,
+                List.of(new TargetMarker(Component.literal("Left Eye"), 2, 25.5f, -3.4f, slots(RobosurgeonBlockEntity.SLOT_EYES)), new TargetMarker(Component.literal("Right Eye"), -2f, 25.5f, -3.4f, slots(RobosurgeonBlockEntity.SLOT_EYES)), new TargetMarker(Component.literal("Brain"), -0.13f, 27.56f, 1.52f, slots(RobosurgeonBlockEntity.SLOT_BRAIN))),
+                List.of(new TargetMarker(Component.literal("Head"), 1.4f, 30.5f, 0f, slots(RobosurgeonBlockEntity.SLOT_HEAD)))),
+        TORSO(0, -54, 26, 32, 0, 120, 120f,
+                List.of(new TargetMarker(Component.literal("Heart"), 0f, 21f, -0.5f, slots(RobosurgeonBlockEntity.SLOT_HEART)), new TargetMarker(Component.literal("Left Lung"), 2.3f, 20f, 0, slots(RobosurgeonBlockEntity.SLOT_LUNGS)), new TargetMarker(Component.literal("Stomach"), 0.0f, 16f, -1.5f, slots(RobosurgeonBlockEntity.SLOT_STOMACH)), new TargetMarker(Component.literal("Right Lung"), -2.3f, 20f, 0f, slots(RobosurgeonBlockEntity.SLOT_LUNGS))),
+                List.of(new TargetMarker(Component.literal("Torso"), -2.2f, 25.2f, 1.0f, slots(RobosurgeonBlockEntity.SLOT_TORSO)))),
+        ARM_LEFT(18, -54, 12, 34, -60, 120, 120f,
+                List.of(),
+                List.of(new TargetMarker(Component.literal("Left Arm"), 4.7f, 21.0f, -0, slots(RobosurgeonBlockEntity.SLOT_ARMS)), new TargetMarker(Component.literal("Left Hand"), 5.8f, 14f, 0f, slots(RobosurgeonBlockEntity.SLOT_HANDS)))),
+        ARM_RIGHT(-18, -54, 12, 34, 60, 120, 120f,
+                List.of(),
+                List.of(new TargetMarker(Component.literal("Right Arm"), -4.7f, 21.0f, 0f, slots(RobosurgeonBlockEntity.SLOT_ARMS)), new TargetMarker(Component.literal("Right Hand"), -5.8f, 14f, 0f, slots(RobosurgeonBlockEntity.SLOT_HANDS)))),
+        LEG_LEFT(5, -19, 12, 38, -50, 20, 120f,
+                List.of(),
+                List.of(new TargetMarker(Component.literal("Left Leg"), 2f, 10.0f, 0f, slots(RobosurgeonBlockEntity.SLOT_LEGS)), new TargetMarker(Component.literal("Left Foot"), 2.1f, 3.9f, 0f, slots(RobosurgeonBlockEntity.SLOT_BOOTS)))),
+        LEG_RIGHT(-5, -19, 12, 38, 50, 20, 120f,
+                List.of(),
+                List.of(new TargetMarker(Component.literal("Right Leg"), -2f, 10.0f, 0f, slots(RobosurgeonBlockEntity.SLOT_LEGS)), new TargetMarker(Component.literal("Right Foot"), -2.1f, 3.9f, 0f, slots(RobosurgeonBlockEntity.SLOT_BOOTS)))),
+        INTERNAL(0, 0, 40, 50, 48, 130, 150f,
+                List.of(new TargetMarker(Component.literal("Skin"), -3.0f, 24.6f, -5.5f, slots(RobosurgeonBlockEntity.SLOT_SKIN)), new TargetMarker(Component.literal("Muscle"), -0, 22.7f, -5.5f, slots(RobosurgeonBlockEntity.SLOT_MUSCLE)), new TargetMarker(Component.literal("Bone"), 3.0f, 20.8f, -5.5f, slots(RobosurgeonBlockEntity.SLOT_BONES))),
+                List.of()),
+        NONE(0, 0, 0, 0, 0, 0, 45f, List.of(), List.of());
         final int hitX, hitY, hitW, hitH, zoomOffsetX, zoomOffsetY;
         final float zoomScale;
-        final List<TargetMarker> markers;
+        final List<TargetMarker> internalMarkers;
+        final List<TargetMarker> externalMarkers;
 
-        BodyPart(int hX, int hY, int hW, int hH, int zX, int zY, float zS, List<TargetMarker> m) {
+        BodyPart(int hX, int hY, int hW, int hH, int zX, int zY, float zS, List<TargetMarker> internal, List<TargetMarker> external) {
             this.hitX = hX;
             this.hitY = hY;
             this.hitW = hW;
@@ -641,7 +693,13 @@ public class RobosurgeonScreen extends AbstractContainerScreen<RobosurgeonMenu> 
             this.zoomOffsetX = zX;
             this.zoomOffsetY = zY;
             this.zoomScale = zS;
-            this.markers = m;
+            this.internalMarkers = internal;
+            this.externalMarkers = external;
+        }
+
+        /** 当前模式下该区域可用的标记;空列表表示此模式下该区域不可选 */
+        List<TargetMarker> markers(boolean externalMode) {
+            return externalMode ? this.externalMarkers : this.internalMarkers;
         }
     }
 

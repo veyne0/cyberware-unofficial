@@ -455,8 +455,23 @@ public class CyberwareUserData implements INBTSerializable<CompoundTag>, IEnergy
 
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        if (nbt.contains("InstalledCyberware"))
-            installedCyberware.deserializeNBT(provider, nbt.getCompound("InstalledCyberware"));
+        if (nbt.contains("InstalledCyberware")) {
+            CompoundTag invTag = nbt.getCompound("InstalledCyberware");
+            // 槽位扩容迁移:旧档(108 格)反序列化会把 handler 缩到旧尺寸,
+            // 因此先读到临时 handler,再按位拷回固定尺寸 handler(旧索引不变)
+            boolean needsMigration = invTag.contains("Size") && invTag.getInt("Size") < RobosurgeonBlockEntity.TOTAL_SLOTS;
+            ItemStackHandler loaded = new ItemStackHandler();
+            loaded.deserializeNBT(provider, invTag);
+            for (int i = 0; i < Math.min(loaded.getSlots(), installedCyberware.getSlots()); i++)
+                installedCyberware.setStackInSlot(i, loaded.getStackInSlot(i));
+            // 旧档玩家默认头颅和躯干还在身上,补齐新增区
+            if (needsMigration) {
+                if (installedCyberware.getStackInSlot(RobosurgeonBlockEntity.SLOT_HEAD).isEmpty())
+                    installedCyberware.setStackInSlot(RobosurgeonBlockEntity.SLOT_HEAD, new ItemStack(ModItems.HUMAN_HEAD.get()));
+                if (installedCyberware.getStackInSlot(RobosurgeonBlockEntity.SLOT_TORSO).isEmpty())
+                    installedCyberware.setStackInSlot(RobosurgeonBlockEntity.SLOT_TORSO, new ItemStack(ModItems.HUMAN_TORSO.get()));
+            }
+        }
         this.maxTolerance = nbt.contains("MaxTolerance") ? nbt.getInt("MaxTolerance") : CyberwareConfig.MAX_TOLERANCE.get();
         isInitialized = nbt.getBoolean("IsInitialized");
         maxEnergy = nbt.getInt("MaxEnergy");
@@ -488,6 +503,8 @@ public class CyberwareUserData implements INBTSerializable<CompoundTag>, IEnergy
         installedCyberware.setStackInSlot(RobosurgeonBlockEntity.SLOT_LEGS + 1, new ItemStack(ModItems.HUMAN_RIGHT_LEG.get()));
         installedCyberware.setStackInSlot(RobosurgeonBlockEntity.SLOT_BOOTS, new ItemStack(ModItems.HUMAN_RIGHT_FOOT.get()));
         installedCyberware.setStackInSlot(RobosurgeonBlockEntity.SLOT_BOOTS + 1, new ItemStack(ModItems.HUMAN_LEFT_FOOT.get()));
+        installedCyberware.setStackInSlot(RobosurgeonBlockEntity.SLOT_HEAD, new ItemStack(ModItems.HUMAN_HEAD.get()));
+        installedCyberware.setStackInSlot(RobosurgeonBlockEntity.SLOT_TORSO, new ItemStack(ModItems.HUMAN_TORSO.get()));
         this.isInitialized = true;
         updateBodyStatus();
     }

@@ -10,6 +10,7 @@ import com.maxwell.cyber_ware_port.client.screen.robosurgeon.RobosurgeonScreen;
 import com.maxwell.cyber_ware_port.client.screen.ScannerScreen;
 import com.maxwell.cyber_ware_port.client.upgrades.CyberLimbModel;
 import com.maxwell.cyber_ware_port.client.upgrades.CyberwarePlayerLayer;
+import com.maxwell.cyber_ware_port.client.upgrades.MobPartPlayerLayer;
 import com.maxwell.cyber_ware_port.common.block.cwb.CyberWareWorkBenchModel;
 import com.maxwell.cyber_ware_port.common.block.cwb.CyberwareWorkbenchRenderer;
 import com.maxwell.cyber_ware_port.common.block.cyberskull.CyberSkullRenderer;
@@ -130,6 +131,7 @@ public class ModClientEvents {
             PlayerRenderer renderer = event.getSkin(skinModel);
             if (renderer != null) {
                 renderer.addLayer(new CyberwarePlayerLayer(renderer, event.getEntityModels()));
+                renderer.addLayer(new MobPartPlayerLayer(renderer, event.getEntityModels()));
             }
         }
     }

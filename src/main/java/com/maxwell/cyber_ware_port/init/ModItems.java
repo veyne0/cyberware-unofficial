@@ -3,6 +3,7 @@ package com.maxwell.cyber_ware_port.init;
 import com.maxwell.cyber_ware_port.CyberWare;
 import com.maxwell.cyber_ware_port.common.CyberwareTabState;
 import com.maxwell.cyber_ware_port.common.block.cyberskull.CyberSkullItemRenderer;
+import com.maxwell.cyber_ware_port.client.render.MobPartItemRenderer;
 import com.maxwell.cyber_ware_port.common.block.robosurgeon.RobosurgeonBlockEntity;
 import com.maxwell.cyber_ware_port.common.item.BlueprintItem;
 import com.maxwell.cyber_ware_port.common.item.ExpCapsuleItem;
@@ -11,6 +12,7 @@ import com.maxwell.cyber_ware_port.common.item.NeuropozyneItem;
 import com.maxwell.cyber_ware_port.common.item.base.BodyPartType;
 import com.maxwell.cyber_ware_port.common.item.base.CyberwareItem;
 import com.maxwell.cyber_ware_port.common.item.componentbox.ComponentBoxItem;
+import com.maxwell.cyber_ware_port.common.item.cyberware.MobPartItem;
 import com.maxwell.cyber_ware_port.common.item.cyberware.arm.*;
 import com.maxwell.cyber_ware_port.common.item.cyberware.bone.BonelacingItem;
 import com.maxwell.cyber_ware_port.common.item.cyberware.bone.CitrateEnhancementItem;
@@ -155,6 +157,26 @@ public class ModItems {
     public static final DeferredHolder<Item, DeployableWheelsItem> DEPLOYABLE_WHEELS = ITEMS.register("foot_upgrades_wheels", DeployableWheelsItem::new);
     public static final DeferredHolder<Item, CyberwareItem> HUMAN_LEFT_FOOT = registerHumanPart("body_part_foot_left", RobosurgeonBlockEntity.SLOT_BOOTS, 1, BodyPartType.FOOT_LEFT);
     public static final DeferredHolder<Item, CyberwareItem> HUMAN_RIGHT_FOOT = registerHumanPart("body_part_foot_right", RobosurgeonBlockEntity.SLOT_BOOTS, 1, BodyPartType.FOOT_RIGHT);
+    public static final DeferredHolder<Item, CyberwareItem> HUMAN_HEAD = registerHumanPart("body_part_head", RobosurgeonBlockEntity.SLOT_HEAD, 1, BodyPartType.HEAD);
+    public static final DeferredHolder<Item, CyberwareItem> HUMAN_TORSO = registerHumanPart("body_part_torso", RobosurgeonBlockEntity.SLOT_TORSO, 1, BodyPartType.TORSO);
+    public static final DeferredHolder<Item, MobPartItem> MOB_PART = ITEMS.register("mob_part", () -> new MobPartItem() {
+        @Override
+        public void initializeClient(Consumer<IClientItemExtensions> consumer) {
+            consumer.accept(new IClientItemExtensions() {
+                private MobPartItemRenderer renderer;
+
+                @Override
+                public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+                    if (this.renderer == null) {
+                        this.renderer = new MobPartItemRenderer(
+                                Minecraft.getInstance().getBlockEntityRenderDispatcher(),
+                                Minecraft.getInstance().getEntityModels());
+                    }
+                    return this.renderer;
+                }
+            });
+        }
+    });
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> CW_TABS = TABS.register("cyber_wear_port",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.cyber_ware_port.items"))
