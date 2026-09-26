@@ -1,0 +1,24 @@
+{
+  "type": "cyberware_unofficial:assembly",
+  "inputs": [
+    {
+      "count": 4,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_actuator"
+      }
+    },
+    {
+      "count": 2,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_fiberoptics"
+      }
+    },
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "minecraft:crafting_table"
+      }
+    }
+  ],
+  "output": "cyberware_unofficial:hand_upgrades_craft_hands"
+}

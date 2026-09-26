@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "cyberware_unofficial:item/lower_organs_upgrades_battery_scavenged"
+  }
+}

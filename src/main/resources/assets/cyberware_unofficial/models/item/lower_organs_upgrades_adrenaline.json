@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:item/generated",
+  "overrides": [
+    {
+      "model": "cyberware_unofficial:item/lower_organs_upgrades_adrenaline_scavenged",
+      "predicate": {
+        "cyberware_unofficial:is_scavenged": 1.0
+      }
+    }
+  ],
+  "textures": {
+    "layer0": "cyberware_unofficial:item/lower_organs_upgrades_adrenaline"
+  }
+}

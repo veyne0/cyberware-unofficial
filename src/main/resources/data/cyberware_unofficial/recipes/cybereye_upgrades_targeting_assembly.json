@@ -1,0 +1,24 @@
+{
+  "type": "cyberware_unofficial:assembly",
+  "inputs": [
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_ssc"
+      }
+    },
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_fiberoptics"
+      }
+    },
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "minecraft:redstone"
+      }
+    }
+  ],
+  "output": "cyberware_unofficial:cybereye_upgrades_targeting"
+}

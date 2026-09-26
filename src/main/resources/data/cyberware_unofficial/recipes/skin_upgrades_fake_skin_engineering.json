@@ -1,0 +1,24 @@
+{
+  "type": "cyberware_unofficial:engineering",
+  "blueprint_chance": 0.15,
+  "input": {
+    "item": "cyberware_unofficial:skin_upgrades_fake_skin"
+  },
+  "outputs": [
+    {
+      "chance": 1.0,
+      "count": 2,
+      "item": "cyberware_unofficial:component_fullerene"
+    },
+    {
+      "chance": 1.0,
+      "count": 1,
+      "item": "cyberware_unofficial:component_synthnerves"
+    },
+    {
+      "chance": 0.8,
+      "count": 2,
+      "item": "minecraft:leather"
+    }
+  ]
+}

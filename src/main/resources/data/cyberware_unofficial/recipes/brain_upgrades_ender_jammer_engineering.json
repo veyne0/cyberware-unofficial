@@ -1,0 +1,24 @@
+{
+  "type": "cyberware_unofficial:engineering",
+  "blueprint_chance": 0.15,
+  "input": {
+    "item": "cyberware_unofficial:brain_upgrades_ender_jammer"
+  },
+  "outputs": [
+    {
+      "chance": 1.0,
+      "count": 1,
+      "item": "cyberware_unofficial:component_ssc"
+    },
+    {
+      "chance": 0.0,
+      "count": 1,
+      "item": "minecraft:ender_pearl"
+    },
+    {
+      "chance": 1.0,
+      "count": 1,
+      "item": "minecraft:obsidian"
+    }
+  ]
+}

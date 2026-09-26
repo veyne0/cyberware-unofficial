@@ -1,0 +1,24 @@
+{
+  "type": "cyberware_unofficial:assembly",
+  "inputs": [
+    {
+      "count": 2,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_storage"
+      }
+    },
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_ssc"
+      }
+    },
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_microelectric"
+      }
+    }
+  ],
+  "output": "cyberware_unofficial:brain_upgrades_cortical_stack"
+}

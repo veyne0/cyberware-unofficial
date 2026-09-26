@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "cyberware_unofficial:item/heart_upgrades_medkit_scavenged"
+  }
+}

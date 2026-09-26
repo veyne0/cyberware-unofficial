@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "cyberware_unofficial:block/blueprint_chest"
+    },
+    "facing=east": {
+      "model": "cyberware_unofficial:block/blueprint_chest",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "cyberware_unofficial:block/blueprint_chest",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "cyberware_unofficial:block/blueprint_chest",
+      "y": 270
+    }
+  }
+}

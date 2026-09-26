@@ -1,0 +1,24 @@
+{
+  "type": "cyberware_unofficial:assembly",
+  "inputs": [
+    {
+      "count": 2,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_actuator"
+      }
+    },
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_plating"
+      }
+    },
+    {
+      "count": 2,
+      "ingredient": {
+        "item": "minecraft:iron_ingot"
+      }
+    }
+  ],
+  "output": "cyberware_unofficial:foot_upgrades_aqua"
+}

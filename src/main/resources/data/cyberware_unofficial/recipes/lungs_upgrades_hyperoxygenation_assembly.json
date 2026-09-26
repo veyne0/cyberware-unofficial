@@ -1,0 +1,24 @@
+{
+  "type": "cyberware_unofficial:assembly",
+  "inputs": [
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_reactor"
+      }
+    },
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_actuator"
+      }
+    },
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_fullerene"
+      }
+    }
+  ],
+  "output": "cyberware_unofficial:lungs_upgrades_hyperoxygenation"
+}

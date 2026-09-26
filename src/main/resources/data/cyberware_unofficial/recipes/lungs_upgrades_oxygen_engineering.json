@@ -1,0 +1,19 @@
+{
+  "type": "cyberware_unofficial:engineering",
+  "blueprint_chance": 0.15,
+  "input": {
+    "item": "cyberware_unofficial:lungs_upgrades_oxygen"
+  },
+  "outputs": [
+    {
+      "chance": 1.0,
+      "count": 2,
+      "item": "cyberware_unofficial:component_plating"
+    },
+    {
+      "chance": 1.0,
+      "count": 1,
+      "item": "cyberware_unofficial:component_actuator"
+    }
+  ]
+}

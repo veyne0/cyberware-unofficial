@@ -1,0 +1,13 @@
+{
+    "mob": "minecraft:wither_skeleton",
+    "replace_with": "cyberware_unofficial:cyber_wither_skeleton",
+    "chance": 0.2,
+    "is_high_tier": true,
+    "special_drops": [
+        "cyberware_unofficial:internal_defibrillator",
+        "cyberware_unofficial:rapid_fire_flywheel"
+    ],
+    "forbidden_drops": [
+        "minecraft:stone_sword"
+    ]
+}

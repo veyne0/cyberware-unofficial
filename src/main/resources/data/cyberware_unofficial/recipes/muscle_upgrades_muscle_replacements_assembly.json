@@ -1,0 +1,18 @@
+{
+  "type": "cyberware_unofficial:assembly",
+  "inputs": [
+    {
+      "count": 2,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_fullerene"
+      }
+    },
+    {
+      "count": 2,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_actuator"
+      }
+    }
+  ],
+  "output": "cyberware_unofficial:muscle_upgrades_muscle_replacements"
+}

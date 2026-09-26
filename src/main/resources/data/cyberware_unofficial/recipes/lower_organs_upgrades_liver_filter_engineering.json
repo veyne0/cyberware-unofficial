@@ -1,0 +1,24 @@
+{
+  "type": "cyberware_unofficial:engineering",
+  "blueprint_chance": 0.15,
+  "input": {
+    "item": "cyberware_unofficial:lower_organs_upgrades_liver_filter"
+  },
+  "outputs": [
+    {
+      "chance": 1.0,
+      "count": 1,
+      "item": "cyberware_unofficial:component_plating"
+    },
+    {
+      "chance": 1.0,
+      "count": 1,
+      "item": "cyberware_unofficial:component_fullerene"
+    },
+    {
+      "chance": 0.5,
+      "count": 1,
+      "item": "minecraft:charcoal"
+    }
+  ]
+}

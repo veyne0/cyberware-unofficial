@@ -1,0 +1,24 @@
+{
+  "type": "cyberware_unofficial:assembly",
+  "inputs": [
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_ssc"
+      }
+    },
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "minecraft:ender_pearl"
+      }
+    },
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "minecraft:obsidian"
+      }
+    }
+  ],
+  "output": "cyberware_unofficial:brain_upgrades_ender_jammer"
+}

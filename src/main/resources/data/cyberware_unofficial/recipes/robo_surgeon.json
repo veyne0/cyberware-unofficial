@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "A A",
+    "TQT",
+    "NMN"
+  ],
+  "key": {
+    "A": {
+      "item": "cyberware_unofficial:component_actuator"
+    },
+    "T": {
+      "item": "cyberware_unofficial:component_titanium"
+    },
+    "Q": {
+      "item": "minecraft:quartz_block"
+    },
+    "N": {
+      "item": "minecraft:nether_bricks"
+    },
+    "M": {
+      "item": "cyberware_unofficial:component_microelectric"
+    }
+  },
+  "result": {
+    "item": "cyberware_unofficial:robo_surgeon",
+    "count": 1
+  }
+}

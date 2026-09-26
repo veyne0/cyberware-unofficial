@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "cyberware_unofficial:item/leg_upgrades_jump_boost_scavenged"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "cyberware_unofficial:assembly",
+  "inputs": [
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_actuator"
+      }
+    },
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_fiberoptics"
+      }
+    },
+    {
+      "count": 2,
+      "ingredient": {
+        "item": "minecraft:glass_pane"
+      }
+    }
+  ],
+  "output": "cyberware_unofficial:cybereye_upgrades_zoom"
+}

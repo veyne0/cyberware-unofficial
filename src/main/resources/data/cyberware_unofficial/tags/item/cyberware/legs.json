@@ -1,0 +1,10 @@
+{
+  "values": [
+    "cyberware_unofficial:body_part_leg_left",
+    "cyberware_unofficial:cyberlimbs_cyberleg_left",
+    "cyberware_unofficial:body_part_leg_right",
+    "cyberware_unofficial:cyberlimbs_cyberleg_right",
+    "cyberware_unofficial:leg_upgrades_jump_boost",
+    "cyberware_unofficial:leg_upgrades_fall_damage"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "type": "cyberware_unofficial:assembly",
+  "inputs": [
+    {
+      "count": 3,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_titanium"
+      }
+    },
+    {
+      "count": 2,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_actuator"
+      }
+    },
+    {
+      "count": 1,
+      "ingredient": {
+        "item": "cyberware_unofficial:component_plating"
+      }
+    }
+  ],
+  "output": "cyberware_unofficial:cyberlimbs_cyberleg_left"
+}

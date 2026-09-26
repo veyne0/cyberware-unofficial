@@ -1,0 +1,19 @@
+{
+  "type": "cyberware_unofficial:engineering",
+  "blueprint_chance": 0.15,
+  "input": {
+    "item": "cyberware_unofficial:leg_upgrades_jump_boost"
+  },
+  "outputs": [
+    {
+      "chance": 1.0,
+      "count": 2,
+      "item": "cyberware_unofficial:component_actuator"
+    },
+    {
+      "chance": 1.0,
+      "count": 1,
+      "item": "minecraft:piston"
+    }
+  ]
+}

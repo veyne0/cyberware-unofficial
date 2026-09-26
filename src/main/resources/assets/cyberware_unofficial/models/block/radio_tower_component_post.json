@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/fence_post",
+  "textures": {
+    "texture": "cyberware_unofficial:block/radio_tower_texture"
+  }
+}
